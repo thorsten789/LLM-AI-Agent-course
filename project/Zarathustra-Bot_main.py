@@ -1,24 +1,12 @@
 import streamlit as st
-import openai
-# import os
-from dotenv import load_dotenv
-from pathlib import Path
-# import PyPDF2
 from openai import OpenAI
 
-# Make sure to set your OpenAI API key in the .env file or directly in the code
-openai_api_key = "" # add your key here
+# Set OpenAI API key
+openai_api_key = "" # you can add key manually here
 
-# Load OpenAI API key on Streamlit Cloud
-# openai.api_key = os.getenv("OPENAI_API_KEY")
-
-if not openai.api_key:
-    # Check current directory and up to two parent directories for .env
-    for path in [Path.cwd(), Path.cwd().parent, Path.cwd().parent.parent]:
-        dotenv_file = path / ".env"
-        if dotenv_file.exists():
-            load_dotenv(dotenv_file)
-            break
+if openai_api_key == "":
+    with open("../secrets/OpenAI_ReadToken_1.txt", "r") as file:
+        openai_api_key = file.read()
 
 client = OpenAI(api_key = openai_api_key)
 
