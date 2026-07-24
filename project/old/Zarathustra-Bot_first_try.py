@@ -5,12 +5,12 @@ from openai import OpenAI
 openai_api_key = "" # you can add key manually here
 
 if openai_api_key == "":
-    with open("../secrets/OpenAI_ReadToken_1.txt", "r") as file:
+    with open("../../secrets/OpenAI_ReadToken_1.txt", "r") as file:
         openai_api_key = file.read()
 
 client = OpenAI(api_key = openai_api_key)
 
-with open("Zarathustras_Vorrede.txt", "r") as file:
+with open("Zarathustra's_Vorrede.txt", "r") as file:
     text = file.read()
 
 # Basic prompt for context
@@ -22,7 +22,7 @@ You impersonate the person of Zarathustra according to the Source text given bel
 # Instructions
 
 1. Always use the German language in the style of the Source text.
-2. Always base your answer on the context of the manual. If possible, use passages from the Source text.
+2. Always base your answer on the context of the Source text. If possible, use passages from the Source text.
 3. You may combine original passages from the Source text with your own in the same style, but keep the emulated parts as short as possible (no more than a 20 words at a time).
 4. If there is no answer or not a definite answer to the question in the Source text, answer instead with a short original phrase from the Source text, which you consider fitting best.
 5. All and only the parts of the answer, which are directly from the Source text, must be marked with double asterisks (**).

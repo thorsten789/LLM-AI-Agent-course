@@ -1,6 +1,5 @@
-Zarathustra's Vorrede.
+# Zarathustra's Vorrede 1
 
-1
 Als Zarathustra dreissig Jahr alt war, verliess er seine Heimat und den See seiner Heimat und ging in das Gebirge. Hier genoss er seines Geistes und seiner Einsamkeit und wurde dessen zehn Jahr nicht müde. Endlich aber verwandelte sich sein Herz, – und eines Morgens stand er mit der Morgenröthe auf, trat vor die Sonne hin und sprach zu ihr also:
 
 »Du grosses Gestirn! Was wäre dein Glück, wenn du nicht Die hättest, welchen du leuchtest!
@@ -15,8 +14,7 @@ Ich möchte verschenken und austheilen, bis die Weisen unter den Menschen wieder
 
 Dazu muss ich in die Tiefe steigen: wie du des Abends thust, wenn du hinter das Meer gehst und noch der Unterwelt Licht bringst, du überreiches Gestirn!
 
-Ich muss, gleich dir,
-untergehen, wie die Menschen es nennen, zu denen ich hinab will.
+Ich muss, gleich dir, untergehen, wie die Menschen es nennen, zu denen ich hinab will.
 
 So segne mich denn, du ruhiges Auge, das ohne Neid auch ein allzugrosses Glück sehen kann!
 
@@ -26,7 +24,8 @@ Siehe! Dieser Becher will wieder leer werden, und Zarathustra will wieder Mensch
 
 – Also begann Zarathustra's Untergang.
 
-2
+# Zarathustra's Vorrede 2
+
 Zarathustra stieg allein das Gebirge abwärts und Niemand begegnete ihm. Als er aber in die Wälder kam, stand auf einmal ein Greis vor ihm, der seine heilige Hütte verlassen hatte, um Wurzeln im Walde zu suchen. Und also sprach der Greis zu Zarathustra:
 
 Nicht fremd ist mir dieser Wanderer: vor manchen Jahre gieng er her vorbei. Zarathustra hiess er; aber er hat sich verwandelt. Damals trugst du deine Asche zu Berge: willst du heute dein Feuer in die Thäler tragen? Fürchtest du nicht des Brandstifters Strafen?
@@ -65,10 +64,10 @@ Mit Singen, Weinen, Lachen und Brummen lobe ich den Gott, der mein Gott ist. Doc
 
 Als Zarathustra diese Worte gehört hatte, grüsste er den Heiligen und sprach: »Was hätte ich euch zu geben! Aber lasst mich schnell davon, dass ich euch Nichts nehme!« – Und so trennten sie sich von einander, der Greis und der Mann, lachend, gleichwie zwei Knaben lachen.
 
-Als Zarathustra aber allein war, sprach er also zu seinem Herzen: »Sollte es denn möglich sein! Dieser alte Heilige hat in seinem Walde noch Nichts davon gehört, dass
-Gott todt ist!« –
+Als Zarathustra aber allein war, sprach er also zu seinem Herzen: »Sollte es denn möglich sein! Dieser alte Heilige hat in seinem Walde noch Nichts davon gehört, dass Gott todt ist!« –
 
-3
+# Zarathustra's Vorrede 3
+
 Als Zarathustra in die Nächste Stadt kam, die an den Wäldern liegt, fand er daselbst viel Volk versammelt auf dem Markte: denn es war verheissen worden, das man einen Seiltänzer sehen solle. Und Zarathustra sprach also zum Volke:
 
 Ich lehre euch den Übermenschen. Der Mensch ist Etwas, das überwunden werden soll. Was habt ihr gethan, ihn zu überwinden?
@@ -81,11 +80,9 @@ Wer aber der Weiseste von euch ist, der ist auch nur ein Zwiespalt und Zwitter v
 
 Seht, ich lehre euch den Übermenschen!
 
-Der Übermensch ist der Sinn der Erde. Euer Wille sage: der Übermensch
-sei der Sinn der Erde!
+Der Übermensch ist der Sinn der Erde. Euer Wille sage: der Übermensch sei der Sinn der Erde!
 
-Ich beschwöre euch, meine Brüder,
-bleibt der Erde treu und glaubt Denen nicht, welche euch von überirdischen Hoffnungen reden! Giftmischer sind es, ob sie es wissen oder nicht.
+Ich beschwöre euch, meine Brüder, bleibt der Erde treu und glaubt Denen nicht, welche euch von überirdischen Hoffnungen reden! Giftmischer sind es, ob sie es wissen oder nicht.
 
 Verächter des Lebens sind es, Absterbende und selber Vergiftete, deren die Erde müde ist: so mögen sie dahinfahren!
 
@@ -123,16 +120,15 @@ Seht, ich lehre euch den Übermenschen: der ist dieser Blitz, der ist dieser Wah
 
 Als Zarathustra so gesprochen hatte, schrie Einer aus dem Volke: »Wir hörten nun genug von dem Seiltänzer; nun lasst uns ihn auch sehen!« Und alles Volk lachte über Zarathustra. Der Seiltänzer aber, welcher glaubte, dass das Wort ihm gälte, machte sich an sein Werk.
 
-4
+# Zarathustra's Vorrede 4
+
 Zarathustra aber sahe das Volk an und wunderte sich. Dann sprach er also:
 
 Der Mensch ist ein Seil, geknüpft zwischen Thier und Übermensch, – ein Seil über einem Abgrunde.
 
 Ein gefährliches Hinüber, ein gefährliches Auf-dem-Wege, ein gefährliches Zurückblicken, ein gefährliches Schaudern und Stehenbleiben.
 
-Was gross ist am Menschen, das ist, dass er eine Brücke und kein Zweck ist: was geliebt werden kann am Menschen, das ist, dass er ein
-Übergang und ein
-Untergang ist.
+Was gross ist am Menschen, das ist, dass er eine Brücke und kein Zweck ist: was geliebt werden kann am Menschen, das ist, dass er ein Übergang und ein Untergang ist.
 
 Ich liebe Die, welche nicht zu leben wissen, es sei denn als Untergehende, denn es sind die Hinübergehenden.
 
@@ -172,7 +168,8 @@ Ich liebe alle Die, welche schwere Tropfen sind, einzeln fallend aus der dunklen
 
 Seht, ich bin ein Verkündiger des Blitzes und ein schwerer Tropfen aus der Wolke: dieser Blitz aber heisst Übermensch. –
 
-5
+# Zarathustra's Vorrede 5
+
 Als Zarathustra diese Worte gesprochen hatte, sahe er wieder das Volk an und schwieg. »Da stehen sie«, sprach er zu seinem Herzen, »da lachen sie: sie verstehen mich nicht, ich bin nicht der Mund für diese Ohren.
 
 Muss man ihnen erst die Ohren zerschlagen, dass sie lernen, mit den Augen hören. Muss man rasseln gleich Pauken und Busspredigern? Oder glauben sie nur dem Stammelnden?
@@ -181,8 +178,7 @@ Sie haben etwas, worauf sie stolz sind. Wie nennen sie es doch, was sie stolz ma
 
 Drum hören sie ungern von sich das Wort »Verachtung«. So will ich denn zu ihrem Stolze reden.
 
-So will ich ihnen vom Verächtlichsten sprechen: das aber ist
-der letzte Mensch.«
+So will ich ihnen vom Verächtlichsten sprechen: das aber ist der letzte Mensch.«
 
 Und also sprach Zarathustra zum Volke:
 
@@ -196,8 +192,7 @@ Ich sage euch: man muss noch Chaos in sich haben, um einen tanzenden Stern gebä
 
 Wehe! Es kommt die Zeit, wo der Mensch keinen Stern mehr gebären wird. Wehe! Es kommt die Zeit des verächtlichsten Menschen, der sich selber nicht mehr verachten kann.
 
-Seht! Ich zeige euch
-den letzten Menschen.
+Seht! Ich zeige euch den letzten Menschen.
 
 »Was ist Liebe? Was ist Schöpfung? Was ist Sehnsucht? Was ist Stern« – so fragt der letzte Mensch und blinzelt.
 
@@ -235,7 +230,8 @@ Unbewegt ist meine Seele und hell wie das Gebirge am Vormittag. Aber sie meinen,
 
 Und nun blicken sie mich an und lachen: und indem sie lachen, hassen sie mich noch. Es ist Eis in ihrem Lachen.
 
-6
+# Zarathustra's Vorrede 6
+
 Da aber geschah Etwas, das jeden Mund stumm und jedes Auge starr machte. Inzwischen nämlich hatte der Seiltänzer sein Werk begonnen: er war aus einer kleiner Thür hinausgetreten und gieng über das Seil, welches zwischen zwei Thürmen gespannt war, also, dass es über dem Markte und dem Volke hieng. Als er eben in der Mitte seines Weges war, öffnete sich die kleine Thür noch einmal, und ein bunter Gesell, einem Possenreisser gleich, sprang heraus und gieng mit schnellen Schritten dem Ersten nach. »Vorwärts, Lahmfuss, rief seine fürchterliche Stimme, vorwärts Faulthier, Schleichhändler, Bleichgesicht! Dass ich dich nicht mit meiner Ferse kitzle! Was treibst du hier zwischen Thürmen? In den Thurm gehörst du, einsperren sollte man dich, einem Bessern, als du bist, sperrst du die freie Bahn!« – Und mit jedem Worte kam er ihm näher und näher: als er aber nur noch einen Schritt hinter ihm war, da geschah das Erschreckliche, das jeden Mund stumm und jedes Auge starr machte: – er stiess ein Geschrei aus wie ein Teufel und sprang über Den hinweg, der ihm im Wege war. Dieser aber, als er so seinen Nebenbuhler siegen sah, verlor dabei den Kopf und das Seil; er warf seine Stange weg und schoss schneller als diese, wie ein Wirbel von Armen und Beinen, in die Tiefe. Der Markt und das Volk glich dem Meere, wenn der Sturm hineinfährt: Alles floh aus einander und übereinander, und am meisten dort, wo der Körper niederschlagen musste.
 
 Zarathustra aber blieb stehen, und gerade neben ihn fiel der Körper hin, übel zugerichtet und zerbrochen, aber noch nicht todt. Nach einer Weile kam dem Zerschmetterten das Bewusstsein zurück, und er sah Zarathustra neben sich knieen. »Was machst du da? sagte er endlich, ich wusste es lange, dass mir der Teufel ein Bein stellen werde. Nun schleppt er mich zur Hölle: willst du's ihm wehren?«
@@ -248,7 +244,8 @@ Der Mann blickte misstrauisch auf. »Wenn du die Wahrheit sprichst, sagte er dan
 
 Als Zarathustra diess gesagt hatte, antwortete der Sterbende nicht mehr; aber er bewegte die Hand, wie als ob er die Hand Zarathustra's zum Danke suche. –
 
-7
+# Zarathustra's Vorrede 7
+
 Inzwischen kam der Abend, und der Markt barg sich in Dunkelheit: da verlief sich das Volk, denn selbst Neugierde und Schrekken werde müde. Zarathustra aber sass neben dem Todten auf der Erde und war in Gedanken versunken: so vergass er die Zeit. Endlich aber wurde es Nacht, und ein kalter Wind blies über den Einsamen. Da erhob sich Zarathustra und sagte zu seinem Herzen:
 
 Wahrlich, einen schönen Fischfang that heute Zarathustra! Keinen Menschen fieng er, wohl aber einen Leichnam.
@@ -261,7 +258,8 @@ Aber noch bin ich ihnen ferne, und mein Sinn redet nicht zu ihren Sinnen. Eine M
 
 Dunkel ist die Nacht, dunkel sind die Wege Zarathustra's. Komm, du kalter und steifer Gefährte! Ich trage dich dorthin, wo ich dich mit meinen Händen begrabe.
 
-8
+# Zarathustra's Vorrede 8
+
 Als Zarathustra diess zu seinem Herzen gesagt hatte, lud er den Leichnam auf seinem Rücken und machte sich auf den Weg. Und noch nicht war er hundert Schritte gegangen, da schlich ein Mensch an ihn heran und flüsterte ihm in's Ohr – und siehe! Der, welcher redete, war der Possenreisser vom Thurme. »Geh weg von dieser Stadt, oh Zarathustra, sprach er; es hassen dich hier zu Viele. Es hassen dich die Guten und Gerechten und sie nennen dich ihren Feind und Verächter; es hassen dich die Gläubigen des rechten Glaubens, und sie nennen dich die Gefahr der Menge. Dein Glück war es, dass man über dich lachte: und wahrlich, du redetest gleich einem Possenreisser. Dein Glück war es, dass du dich dem todten Hunde geselltest; als du dich so erniedrigtest, hast du dich selber für heute errettet. Geh aber fort aus dieser Stadt – oder morgen springe ich über dich hinweg, ein Lebendiger über einen Todten.« Und als er diess gesagt hatte, verschwand der Mensch; Zarathustra aber gieng weiter durch die dunklen Gassen.
 
 Am Thore der Stadt begegneten ihm die Todtengräber: sie leuchteten ihm mit der Fackel in's Gesicht, erkannten Zarathustra und spotteten sehr über ihn. »Zarathustra trägt den todten Hund davon: brav, dass Zarathustra zum Todtengräber wurde! Denn unsere Hände sind zu reinlich für diesen Braten. Will Zarathustra wohl dem Teufel seinen Bissen stehlen? Nun wohlan! Und gut Glück zur Mahlzeit! Wenn nur nicht der Teufel ein besserer Dieb ist, als Zarathustra! – er stiehlt die Beide, er frisst sie Beide!« Und sie lachten mit einander und steckten die Köpfe zusammen.
@@ -280,7 +278,8 @@ Der Alte gieng fort, kam aber gleich zurück und bot Zarathustra Brod und Wein. 
 
 Darauf gieng Zarathustra wieder zwei Stunden und vertraute dem Wege und dem Lichte der Sterne: denn er war ein gewohnter Nachtgänger und liebte es, allem Schlafenden in's Gesicht zu sehn. Als aber der Morgen graute, fand sich Zarathustra in einem tiefen Walde, und kein Weg zeigte sich ihm mehr. Da legte er den Todten in einen hohlen Baum sich zu Häupten – denn er wollte ihn vor den Wölfen schützen – und sich selber auf den Boden und das Moos. Und alsbald schlief er ein, müden Leibes, aber mit einer unbewegten Seele.
 
-9
+# Zarathustra's Vorrede 9
+
 Lange schlief Zarathustra, und nicht nur die Morgenröthe gieng über sein Antlitz, sondern auch der Vormittag. Endlich aber that sein Auge sich auf: verwundert sah Zarathustra in den Wald und die Stille, verwundert sah er in sich hinein. Dann erhob er sich schnell, wie ein Seefahrer, der mit Einem Male Land sieht, und jauchzte: denn er sah eine neue Wahrheit. Und also redete er dann zu seinem Herzen:
 
 Ein Licht gieng mir auf: Gefährten brauche ich und lebendige, – nicht todte Gefährten und Leichname, die ich mit mir trage, wohin ich will.
@@ -317,7 +316,8 @@ Den Einsiedlern werde ich mein Lied singen und den Zweisiedlern; und wer noch Oh
 
 Zu meinem Ziele will ich, ich gehe meinen Gang; über die Zögernden und Saumseligen werde ich hinwegspringen. Also sei mein Gang ihr Untergang!
 
-10
+# Zarathustra's Vorrede 10
+
 Diess hatte Zarathustra zu seinem Herzen gesprochen, als die Sonne im Mittag stand: da blickte er fragend in die Höhe – denn er hörte über sich den scharfen Ruf eines Vogels. Und siehe! Ein Adler zog in weiten Kreisen durch die Luft, und an ihm hieng eine Schlange, nicht einer Beute gleich, sondern einer Freundin: denn sie hielt sich um seinen Hals geringelt.
 
 »Es sind meine Thiere!« sagte Zarathustra und freute sich von Herzen.
