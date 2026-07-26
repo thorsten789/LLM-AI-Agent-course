@@ -1,16 +1,26 @@
 import streamlit as st
 from openai import OpenAI
+import getpass
+import os
 
 # Set OpenAI API key
-openai_api_key = "" # you can add key manually here
+if "OPENAI_API_KEY" not in os.environ:
+    if os.path.exists("../secrets/OpenAI_ReadToken_1.txt"):
+        with open("../secrets/OpenAI_ReadToken_1.txt", "r") as file:
+            os.environ["OPENAI_API_KEY"] = file.read()
+    else:
+        os.environ["OPENAI_API_KEY"] = getpass.getpass("Enter your OpenAI API key: ")
 
-if openai_api_key == "":
-    with open("../secrets/OpenAI_ReadToken_1.txt", "r") as file:
-        openai_api_key = file.read()
-
+openai_api_key = os.environ["OPENAI_API_KEY"]
 client = OpenAI(api_key = openai_api_key)
 
-with open("Source_text/11_Von_den_drei_Verwandlungen.txt", "r") as file:
+# Put all filenames of the texts in the Source_text folder into a sorted list
+textfilenames = sorted([f for f in os.listdir("Source_text") if f.endswith(".txt")])
+
+# note: list index = the number the filename starts with - 1
+
+# example text: 11_...
+with open(f"Source_text/{textfilenames[10]}", "r") as file:
     text = file.read()
 
 # Basic prompt for context

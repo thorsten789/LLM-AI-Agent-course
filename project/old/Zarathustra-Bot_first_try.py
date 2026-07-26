@@ -1,16 +1,20 @@
 import streamlit as st
 from openai import OpenAI
+import getpass
+import os
 
 # Set OpenAI API key
-openai_api_key = "" # you can add key manually here
+if "OPENAI_API_KEY" not in os.environ:
+    if os.path.exists("../../secrets/OpenAI_ReadToken_1.txt"):
+        with open("../../secrets/OpenAI_ReadToken_1.txt", "r") as file:
+            os.environ["OPENAI_API_KEY"] = file.read()
+    else:
+        os.environ["OPENAI_API_KEY"] = getpass.getpass("Enter your OpenAI API key: ")
 
-if openai_api_key == "":
-    with open("../../secrets/OpenAI_ReadToken_1.txt", "r") as file:
-        openai_api_key = file.read()
-
+openai_api_key = os.environ["OPENAI_API_KEY"]
 client = OpenAI(api_key = openai_api_key)
 
-with open("Zarathustra's_Vorrede.txt", "r") as file:
+with open("Zarathustras_Vorrede.txt", "r") as file:
     text = file.read()
 
 # Basic prompt for context
