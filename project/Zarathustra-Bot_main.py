@@ -1,15 +1,77 @@
 import pickle
+import random
+import re
 import time
 import numpy as np
 import openai
 import streamlit as st
 from langchain.chat_models import init_chat_model
 from langchain.messages import SystemMessage, HumanMessage, AIMessage
+from langchain_core.messages import ToolMessage
+from langchain_core.tools import tool
 import getpass
 import os
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 VECTORSTORE_FILE = os.path.join(BASE_DIR, "source_text_vectorstore.pkl")
+
+
+def retrieve_source_text_for_query(query: str) -> dict | None:
+    vectorstore = st.session_state.get("vectorstore")
+    if vectorstore is None:
+        return None
+
+    texts = vectorstore.get("texts", [])
+    if not texts:
+        return None
+
+    embeddings = vectorstore.get("embeddings")
+    if embeddings is None:
+        return {"text": texts[-1], "title": vectorstore.get("titles", ["Unknown source"])[-1]}
+
+    query_embedding = embed_text(query)
+    index_embeddings = np.asarray(embeddings, dtype=np.float32)
+    if index_embeddings.ndim == 1:
+        index_embeddings = index_embeddings.reshape(1, -1)
+    if query_embedding.ndim == 1:
+        query_embedding = query_embedding.reshape(1, -1)
+
+    dot_products = index_embeddings.dot(query_embedding.T).ravel()
+    query_norm = np.linalg.norm(query_embedding)
+    index_norms = np.linalg.norm(index_embeddings, axis=1)
+    similarities = dot_products / (index_norms * query_norm + 1e-12)
+    best_index = int(np.argmax(similarities))
+    return {
+        "text": texts[best_index],
+        "title": vectorstore.get("titles", ["Unknown source"])[best_index],
+    }
+
+
+def build_retrieval_query(text: str) -> str:
+    words = re.findall(r"\b[\wäöüÄÖÜß]+\b", text.lower())
+    unique_words = sorted(set(words))
+
+    if not unique_words:
+        return text.strip()
+
+    if len(unique_words) < 10:
+        selected_words = unique_words
+    else:
+        sample_size = max(10, min(50, int(len(unique_words) * 0.05)))
+        selected_words = random.sample(unique_words, sample_size)
+
+    return " ".join(selected_words)
+
+
+@tool
+def new_text_tool(query: str) -> str:
+    """Return a new source-text selection and chapter title based on the previous quote."""
+    print("Called new_text_tool.\n")
+    retrieval_query = build_retrieval_query(query)
+    result = retrieve_source_text_for_query(retrieval_query)
+    if result is None:
+        return "No source text available."
+    return f"Chapter: {result['title']}\n{result['text']}"
 
 
 def embed_text(text, max_retries=3, backoff_seconds=2):
@@ -72,17 +134,12 @@ def select_best_source(query):
     vectorstore = st.session_state.get("vectorstore")
     if vectorstore is None:
         return None, None
-    query_embedding = embed_text(query)
-    index_embeddings = vectorstore["embeddings"]
-    dot_products = index_embeddings.dot(query_embedding)
-    query_norm = np.linalg.norm(query_embedding)
-    index_norms = np.linalg.norm(index_embeddings, axis=1)
-    similarities = dot_products / (index_norms * query_norm + 1e-12)
-    best_index = int(np.argmax(similarities))
-    return (
-        vectorstore["titles"][best_index],
-        vectorstore["texts"][best_index],
-    )
+
+    best_result = retrieve_source_text_for_query(query)
+    if best_result is None:
+        return None, None
+
+    return best_result["title"], best_result["text"]
 
 # One-time initialization for this Streamlit session
 if "app_initialized" not in st.session_state:
@@ -123,13 +180,26 @@ You impersonate the person of Zarathustra according to the Source text given bel
 
 # Instructions
 
-1. Always answer only with original passages from the Source text. Do not add, paraphrase, summarize, modify, or invent any words or ideas.
-2. Each single passage must be a verbatim excerpt from the Source text and must not be longer than 400 characters.
-3. You may include up to three original passages in one answer. If you move from one part of the Source text to a different part, always insert the exact marker "[...]" between the passages.
-4. Do not write any explanation, interpretation, or filler text. The response must consist exclusively of the selected exact quote(s) from the Source text.
-5. Always select the best-fitting original quote from the chosen Source text for the new user input. Under these rules, the answer must still be provided using the selected text; do not respond with "No suitable passage found."
+1. Return only verbatim passages from the Source text. Do not add, paraphrase, summarize, explain, modify, or invent anything.
+2. Each passage must be an exact excerpt from the Source text and must not be longer than 400 characters. It must be continuous and complete, with no omissions, ellipses, or jumps inside the passage.
+3. You may include up to three passages in one answer. If you use more than one, each new passage must come from a different chapter. A new passage is allowed only after you finish the current passage and call new_text_tool once before selecting the next one.
+4. For each passage, use the most recently received source text. This may be the initial text shown below or a later text returned by the tool. Do not use older text, earlier conversation context, or a merged combination of chunks. Keep each source text block separate.
+5. Do not reuse a sentence that was already used in this answer. If a tool result repeats a source text you already used in this answer, choose a different passage from the latest available source text. If that is not possible, stop there and do not add anything else.
+6. Before you add a second or third passage, call new_text_tool once for each additional passage. Do this immediately after choosing the previous passage and before choosing the next one.
+7. When you call new_text_tool, pass the previous quote as a plain string with no chapter label, no commentary, and no surrounding explanation. The tool will return a new source selection based on that quote. The tool result contains a chapter header followed by the actual text. Use only the text after the header as the relevant source text for the next passage.
+8. Keep every quoted passage distinct. Never repeat a sentence or passage within the same answer.
+9. The response must consist exclusively of the selected exact quote(s). Do not include any prose, interpretation, filler text, or chapter labels inside the quote content.
+10. Do not use the marker "[...]" or any other placeholder. Do not write chapter attribution inside the response body. The application will render the chapter origin automatically after each quote paragraph.
+11. Put each quote in its own paragraph and separate multiple quotes with a blank line.
+12. Always choose the most fitting quote from the selected Source text for the user's latest request. If no suitable passage is found, do not answer with a placeholder such as "No suitable passage found."
 
-# The Source text to start with is the following:
+# Relevant source text
+The relevant source text for your current step is determined as follows:
+- For the first passage in this answer, it is the text shown below.
+- After you call new_text_tool, the most recent tool result becomes the relevant source text for the next passage.
+Use only that relevant source text for your next passage selection. For the first passage, it is the text shown below. For later passages, it is the most recent tool result, from its first character to its last character. Do not use any earlier chunk, any earlier message, or any merged combination of chunks.
+This is the relevant source text for the first passage in this answer:
+
 {source_text}"""
 
     st.session_state["developer_prompt_template"] = prompt_template
@@ -162,13 +232,68 @@ def build_history_messages(messages):
     ]
 
 
-def get_openai_response(system_prompt: str, history_messages):
+def render_assistant_message(message):
+    content = message.get("content", "")
+    quote_labels = message.get("quote_labels", [])
+
+    if not quote_labels:
+        st.markdown(content)
+        return
+
+    blocks = [block.strip() for block in re.split(r"\n\s*\n", content.strip()) if block.strip()]
+    if not blocks:
+        st.markdown(content)
+        return
+
+    for i, block in enumerate(blocks):
+        st.markdown(block)
+        if i < len(quote_labels):
+            label = quote_labels[i]
+            st.markdown(f"*(Aus dem Kapitel: {label})*")
+        if i < len(blocks) - 1:
+            st.write("")
+
+
+def get_openai_response(system_prompt: str, history_messages, initial_quote_label: str | None = None):
     try:
         chain_messages = [SystemMessage(content=system_prompt)] + history_messages
-        response = client.invoke(chain_messages)
-        return response.content.strip()
+        bound_model = client.bind_tools([new_text_tool])
+        quote_labels = [initial_quote_label] if initial_quote_label else []
+
+        for _ in range(3):
+            response = bound_model.invoke(chain_messages)
+            tool_calls = getattr(response, "tool_calls", None)
+            if tool_calls is None:
+                tool_calls = getattr(response, "additional_kwargs", {}).get("tool_calls", [])
+
+            if not tool_calls:
+                return response.content.strip(), quote_labels
+
+            chain_messages.append(response)
+            for tool_call in tool_calls:
+                tool_name = getattr(tool_call, "name", None) or (tool_call.get("name") if isinstance(tool_call, dict) else None)
+                tool_id = getattr(tool_call, "id", None) or (tool_call.get("id") if isinstance(tool_call, dict) else None)
+                if tool_name != "new_text_tool":
+                    chain_messages.append(
+                        ToolMessage(content=f"Unknown tool: {tool_name}", tool_call_id=tool_id, name=tool_name)
+                    )
+                    continue
+
+                tool_args = getattr(tool_call, "args", {}) or {}
+                if not isinstance(tool_args, dict):
+                    tool_args = {"query": str(tool_args or "")}
+                tool_output = new_text_tool.invoke({"query": tool_args.get("query", "")})
+                chain_messages.append(
+                    ToolMessage(content=str(tool_output), tool_call_id=tool_id, name=tool_name)
+                )
+                if isinstance(tool_output, str):
+                    first_line = tool_output.splitlines()[0].strip() if tool_output else ""
+                    if first_line.startswith("Chapter:"):
+                        quote_labels.append(first_line.replace("Chapter:", "", 1).strip())
+
+        return response.content.strip(), quote_labels
     except Exception as e:
-        return f"Error: {e}"
+        return f"Error: {e}", quote_labels if 'quote_labels' in locals() else []
 
 
 # Streamlit UI
@@ -186,9 +311,10 @@ if "messages" not in st.session_state:
 # Display chat messages from history on app rerun
 for message in st.session_state.messages[1:]:
     with st.chat_message(message["role"]):
-        st.markdown(message["content"])
-        if message.get("role") == "assistant" and "source_title" in message:
-            st.markdown(f"*(Aus dem Kapitel: {message['source_title']})*")
+        if message.get("role") == "assistant":
+            render_assistant_message(message)
+        else:
+            st.markdown(message["content"])
 
 # Accept user input
 if prompt := st.chat_input("Eingabe:"):
@@ -204,7 +330,18 @@ if prompt := st.chat_input("Eingabe:"):
     history_messages = build_history_messages(st.session_state.messages)
 
     with st.chat_message("assistant"):
-        assistant_response = get_openai_response(system_prompt, history_messages)
-        st.markdown(assistant_response)
-        st.markdown(f"*(Aus dem Kapitel: {source_title})*")
-    st.session_state.messages.append({"role": "assistant", "content": assistant_response, "source_title": source_title})
+        assistant_response, quote_labels = get_openai_response(
+            system_prompt,
+            history_messages,
+            source_title,
+        )
+        render_assistant_message({
+            "role": "assistant",
+            "content": assistant_response,
+            "quote_labels": quote_labels,
+        })
+    st.session_state.messages.append({
+        "role": "assistant",
+        "content": assistant_response,
+        "quote_labels": quote_labels,
+    })
