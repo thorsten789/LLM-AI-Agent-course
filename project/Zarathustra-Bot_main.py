@@ -57,7 +57,7 @@ def build_retrieval_query(text: str) -> str:
     if len(unique_words) < 10:
         selected_words = unique_words
     else:
-        sample_size = max(10, min(50, int(len(unique_words) * 0.05)))
+        sample_size = max(4, min(20, int(len(unique_words) * 0.05)))
         selected_words = random.sample(unique_words, sample_size)
 
     return " ".join(selected_words)
@@ -232,6 +232,37 @@ def build_history_messages(messages):
     ]
 
 
+def split_quote_blocks(content: str) -> list[str]:
+    return [block.strip() for block in re.split(r"\n\s*\n", content.strip()) if block.strip()]
+
+
+def infer_quote_label(quote: str, fallback_label: str | None = None) -> str:
+    vectorstore = st.session_state.get("vectorstore")
+    if vectorstore:
+        titles = vectorstore.get("titles", [])
+        texts = vectorstore.get("texts", [])
+        for title, source_text in zip(titles, texts):
+            if quote and quote in source_text:
+                return title
+
+    retrieved = retrieve_source_text_for_query(quote)
+    if retrieved and retrieved.get("title"):
+        return retrieved["title"]
+
+    return fallback_label or ""
+
+
+def build_quote_labels_for_content(content: str, fallback_label: str | None = None) -> list[str]:
+    if content.startswith("Error:"):
+        return []
+
+    blocks = split_quote_blocks(content)
+    if not blocks:
+        return []
+
+    return [infer_quote_label(block, fallback_label=fallback_label) for block in blocks]
+
+
 def render_assistant_message(message):
     content = message.get("content", "")
     quote_labels = message.get("quote_labels", [])
@@ -240,7 +271,7 @@ def render_assistant_message(message):
         st.markdown(content)
         return
 
-    blocks = [block.strip() for block in re.split(r"\n\s*\n", content.strip()) if block.strip()]
+    blocks = split_quote_blocks(content)
     if not blocks:
         st.markdown(content)
         return
@@ -249,7 +280,8 @@ def render_assistant_message(message):
         st.markdown(block)
         if i < len(quote_labels):
             label = quote_labels[i]
-            st.markdown(f"*(Aus dem Kapitel: {label})*")
+            if label:
+                st.markdown(f"*(Aus dem Kapitel: {label})*")
         if i < len(blocks) - 1:
             st.write("")
 
@@ -330,11 +362,12 @@ if prompt := st.chat_input("Eingabe:"):
     history_messages = build_history_messages(st.session_state.messages)
 
     with st.chat_message("assistant"):
-        assistant_response, quote_labels = get_openai_response(
+        assistant_response, _ = get_openai_response(
             system_prompt,
             history_messages,
             source_title,
         )
+        quote_labels = build_quote_labels_for_content(assistant_response, fallback_label=source_title)
         render_assistant_message({
             "role": "assistant",
             "content": assistant_response,
