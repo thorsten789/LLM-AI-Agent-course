@@ -47,6 +47,54 @@ def retrieve_source_text_for_query(query: str) -> dict | None:
     }
 
 
+def retrieve_source_text_candidates(
+    query: str,
+    top_k: int = 3,
+    exclude_titles: set[str] | None = None,
+    search_k: int | None = None,
+) -> list[dict]:
+    vectorstore = st.session_state.get("vectorstore")
+    if vectorstore is None:
+        return []
+
+    texts = vectorstore.get("texts", [])
+    if not texts:
+        return []
+
+    titles = vectorstore.get("titles", ["Unknown source"] * len(texts))
+    embeddings = vectorstore.get("embeddings")
+    if embeddings is None:
+        return [{"text": texts[-1], "title": titles[-1]}]
+
+    query_embedding = embed_text(query)
+    index_embeddings = np.asarray(embeddings, dtype=np.float32)
+    if index_embeddings.ndim == 1:
+        index_embeddings = index_embeddings.reshape(1, -1)
+    if query_embedding.ndim == 1:
+        query_embedding = query_embedding.reshape(1, -1)
+
+    dot_products = index_embeddings.dot(query_embedding.T).ravel()
+    query_norm = np.linalg.norm(query_embedding)
+    index_norms = np.linalg.norm(index_embeddings, axis=1)
+    similarities = dot_products / (index_norms * query_norm + 1e-12)
+
+    ranked_indices = np.argsort(similarities)[::-1]
+    if search_k is not None:
+        ranked_indices = ranked_indices[: max(1, min(search_k, len(ranked_indices)))]
+
+    excluded = exclude_titles or set()
+    selected = []
+    for i in ranked_indices:
+        title = titles[int(i)]
+        if title in excluded:
+            continue
+        selected.append({"text": texts[int(i)], "title": title})
+        if len(selected) >= max(1, top_k):
+            break
+
+    return selected
+
+
 def build_retrieval_query(text: str) -> str:
     words = re.findall(r"\b[\wäöüÄÖÜß]+\b", text.lower())
     unique_words = sorted(set(words))
@@ -66,11 +114,34 @@ def build_retrieval_query(text: str) -> str:
 @tool
 def new_text_tool(query: str) -> str:
     """Return a new source-text selection and chapter title based on the previous quote."""
-    print("Called new_text_tool.\n")
+    print("Called new_text_tool (LLM).\n")
     retrieval_query = build_retrieval_query(query)
-    result = retrieve_source_text_for_query(retrieval_query)
-    if result is None:
+
+    used_chapters = st.session_state.get("_response_used_chapters", set())
+
+    # Each chunk corresponds to exactly one chapter. First try to pick from chapters
+    # not yet used in this answer, scanning the full ranking.
+    candidates = retrieve_source_text_candidates(
+        retrieval_query,
+        top_k=3,
+        exclude_titles=set(used_chapters),
+        search_k=None,
+    )
+
+    # If no alternative chapter is found, fall back to the plain top-3 pool.
+    if not candidates:
+        candidates = retrieve_source_text_candidates(retrieval_query, top_k=3)
+
+    if not candidates:
         return "No source text available."
+
+    result = random.choice(candidates)
+
+    if result.get("title"):
+        updated_used_chapters = set(used_chapters)
+        updated_used_chapters.add(result["title"])
+        st.session_state["_response_used_chapters"] = updated_used_chapters
+
     return f"Chapter: {result['title']}\n{result['text']}"
 
 
@@ -180,8 +251,8 @@ You impersonate the person of Zarathustra according to the Source text given bel
 
 # Instructions
 
-1. Return only verbatim passages from the Source text. Do not add, paraphrase, summarize, explain, modify, or invent anything.
-2. Each passage must be an exact excerpt from the Source text and must not be longer than 400 characters. It must be continuous and complete, with no omissions, ellipses, or jumps inside the passage.
+1. Return only verbatim passages from the source text. Do not add, paraphrase, summarize, explain, modify, or invent anything.
+2. Each passage must be an exact excerpt from the source text and must not be longer than 400 characters. It must be continuous and complete, with no omissions, ellipses, or jumps inside the passage. It must not contain the phrases "Also begann Zarathustra's Untergang" or "Also sprach Zarathustra".
 3. You may include up to three passages in one answer. If you use more than one, each new passage must come from a different chapter. A new passage is allowed only after you finish the current passage and call new_text_tool once before selecting the next one.
 4. For each passage, use the most recently received source text. This may be the initial text shown below or a later text returned by the tool. Do not use older text, earlier conversation context, or a merged combination of chunks. Keep each source text block separate.
 5. Do not reuse a sentence that was already used in this answer. If a tool result repeats a source text you already used in this answer, choose a different passage from the latest available source text. If that is not possible, stop there and do not add anything else.
@@ -191,7 +262,7 @@ You impersonate the person of Zarathustra according to the Source text given bel
 9. The response must consist exclusively of the selected exact quote(s). Do not include any prose, interpretation, filler text, or chapter labels inside the quote content.
 10. Do not use the marker "[...]" or any other placeholder. Do not write chapter attribution inside the response body. The application will render the chapter origin automatically after each quote paragraph.
 11. Put each quote in its own paragraph and separate multiple quotes with a blank line.
-12. Always choose the most fitting quote from the selected Source text for the user's latest request. If no suitable passage is found, do not answer with a placeholder such as "No suitable passage found."
+12. Always choose the most fitting quote from the relevant source text. Do not answer with a placeholder such as "No suitable passage found." Each time you have received a chunk of the source text, always select a passage from it.
 
 # Relevant source text
 The relevant source text for your current step is determined as follows:
@@ -236,23 +307,21 @@ def split_quote_blocks(content: str) -> list[str]:
     return [block.strip() for block in re.split(r"\n\s*\n", content.strip()) if block.strip()]
 
 
-def infer_quote_label(quote: str, fallback_label: str | None = None) -> str:
-    vectorstore = st.session_state.get("vectorstore")
-    if vectorstore:
-        titles = vectorstore.get("titles", [])
-        texts = vectorstore.get("texts", [])
-        for title, source_text in zip(titles, texts):
-            if quote and quote in source_text:
-                return title
+def parse_tool_output(tool_output: str) -> tuple[str, str]:
+    if not isinstance(tool_output, str) or not tool_output.strip():
+        return "", ""
 
-    retrieved = retrieve_source_text_for_query(quote)
-    if retrieved and retrieved.get("title"):
-        return retrieved["title"]
+    lines = tool_output.splitlines()
+    first_line = lines[0].strip() if lines else ""
+    if first_line.startswith("Chapter:"):
+        title = first_line.replace("Chapter:", "", 1).strip()
+        text = "\n".join(lines[1:]).strip()
+        return title, text
 
-    return fallback_label or ""
+    return "", tool_output.strip()
 
 
-def build_quote_labels_for_content(content: str, fallback_label: str | None = None) -> list[str]:
+def align_quote_labels_to_blocks(content: str, quote_labels: list[str]) -> list[str]:
     if content.startswith("Error:"):
         return []
 
@@ -260,12 +329,117 @@ def build_quote_labels_for_content(content: str, fallback_label: str | None = No
     if not blocks:
         return []
 
-    return [infer_quote_label(block, fallback_label=fallback_label) for block in blocks]
+    labels = [label for label in quote_labels if isinstance(label, str) and label.strip()]
+    if not labels:
+        return []
+
+    if len(labels) >= len(blocks):
+        return labels[:len(blocks)]
+
+    return labels + [labels[-1]] * (len(blocks) - len(labels))
+
+
+def extract_quote_from_chunk_text(chunk_text: str, max_chars: int = 400) -> str:
+    lines = [line.strip() for line in chunk_text.splitlines() if line.strip()]
+    if not lines:
+        return ""
+
+    if lines[0].startswith("#"):
+        lines = lines[1:]
+    if not lines:
+        return ""
+
+    text = " ".join(lines)
+    text = re.sub(r"\s+", " ", text).strip()
+
+    banned_phrases = ["– Also begann Zarathustra's Untergang.", "Also sprach Zarathustra."]
+    for phrase in banned_phrases:
+        text = text.replace(phrase, "")
+    text = re.sub(r"\s+", " ", text).strip()
+    if not text:
+        return ""
+
+    quote = text[:max_chars].rstrip()
+    sentence_cut = max(quote.rfind("."), quote.rfind("!"), quote.rfind("?"))
+    if sentence_cut >= 80:
+        quote = quote[: sentence_cut + 1].strip()
+
+    return quote
+
+
+def postprocess_response_with_forced_fallback(
+    response_text: str,
+    retrieved_chunks: list[dict],
+    quote_labels: list[str],
+) -> tuple[str, list[str]]:
+    """Post-processing phase: enforce one quote block per retrieval step.
+
+    This runs after model generation and may append fallback quote blocks when
+    the model under-produces quote blocks relative to the retrieval steps.
+    """
+    if response_text.startswith("Error:"):
+        return response_text, quote_labels
+
+    blocks = split_quote_blocks(response_text)
+
+    # If the model skipped tool-calling entirely, force one retrieval so repeated
+    # prompts are less likely to stay in the same chapter.
+    if not retrieved_chunks and len(blocks) == 1:
+        print("Forced fallback retrieval triggered (no LLM tool call in this answer).\n")
+        forced_query = blocks[0]
+        retrieval_query = build_retrieval_query(forced_query)
+        used_chapters = st.session_state.get("_response_used_chapters", set())
+
+        candidates = retrieve_source_text_candidates(
+            retrieval_query,
+            top_k=3,
+            exclude_titles=set(used_chapters),
+            search_k=None,
+        )
+        if not candidates:
+            candidates = retrieve_source_text_candidates(retrieval_query, top_k=3)
+
+        if not candidates:
+            print("Forced fallback retrieval found no source text candidates.\n")
+            return response_text, quote_labels
+
+        forced_result = random.choice(candidates)
+        forced_tool_output = f"Chapter: {forced_result['title']}\n{forced_result['text']}"
+        forced_title, forced_text = parse_tool_output(str(forced_tool_output))
+        forced_quote = extract_quote_from_chunk_text(forced_text)
+        if forced_title:
+            quote_labels.append(forced_title)
+            retrieved_chunks.append({"title": forced_title, "text": forced_text})
+            updated_used_chapters = set(used_chapters)
+            updated_used_chapters.add(forced_title)
+            st.session_state["_response_used_chapters"] = updated_used_chapters
+        if forced_quote:
+            response_text = response_text + "\n\n" + forced_quote
+            blocks = split_quote_blocks(response_text)
+            print(f"Forced fallback quote appended to answer (chapter: {forced_title}).\n")
+        else:
+            print("Forced fallback retrieval produced no quote text to append.\n")
+
+    expected_blocks = 1 + len(retrieved_chunks)
+    if len(blocks) < expected_blocks:
+        fallback_quotes = []
+        start_chunk_index = max(0, len(blocks) - 1)
+        for chunk in retrieved_chunks[start_chunk_index:]:
+            quote = extract_quote_from_chunk_text(chunk.get("text", ""))
+            if quote:
+                fallback_quotes.append(quote)
+            if len(blocks) + len(fallback_quotes) >= expected_blocks:
+                break
+        if fallback_quotes:
+            response_text = response_text + "\n\n" + "\n\n".join(fallback_quotes)
+            print(f"Forced fallback post-processing appended {len(fallback_quotes)} quote(s) to match retrieval steps.\n")
+
+    return response_text, quote_labels
 
 
 def render_assistant_message(message):
     content = message.get("content", "")
-    quote_labels = message.get("quote_labels", [])
+    quote_labels = align_quote_labels_to_blocks(content, message.get("quote_labels", []))
 
     if not quote_labels:
         st.markdown(content)
@@ -288,9 +462,15 @@ def render_assistant_message(message):
 
 def get_openai_response(system_prompt: str, history_messages, initial_quote_label: str | None = None):
     try:
+        used_chapters = set()
+        if initial_quote_label:
+            used_chapters.add(initial_quote_label)
+        st.session_state["_response_used_chapters"] = used_chapters
+
         chain_messages = [SystemMessage(content=system_prompt)] + history_messages
         bound_model = client.bind_tools([new_text_tool])
         quote_labels = [initial_quote_label] if initial_quote_label else []
+        retrieved_chunks = []
 
         for _ in range(3):
             response = bound_model.invoke(chain_messages)
@@ -299,7 +479,14 @@ def get_openai_response(system_prompt: str, history_messages, initial_quote_labe
                 tool_calls = getattr(response, "additional_kwargs", {}).get("tool_calls", [])
 
             if not tool_calls:
-                return response.content.strip(), quote_labels
+                response_text = response.content.strip()
+                # Post-processing phase: enforce retrieval-to-quote correspondence.
+                response_text, quote_labels = postprocess_response_with_forced_fallback(
+                    response_text,
+                    retrieved_chunks,
+                    quote_labels,
+                )
+                return response_text, quote_labels
 
             chain_messages.append(response)
             for tool_call in tool_calls:
@@ -319,13 +506,21 @@ def get_openai_response(system_prompt: str, history_messages, initial_quote_labe
                     ToolMessage(content=str(tool_output), tool_call_id=tool_id, name=tool_name)
                 )
                 if isinstance(tool_output, str):
-                    first_line = tool_output.splitlines()[0].strip() if tool_output else ""
-                    if first_line.startswith("Chapter:"):
-                        quote_labels.append(first_line.replace("Chapter:", "", 1).strip())
+                    title, chunk_text = parse_tool_output(tool_output)
+                    if title:
+                        quote_labels.append(title)
+                        retrieved_chunks.append(
+                            {
+                                "title": title,
+                                "text": chunk_text,
+                            }
+                        )
 
         return response.content.strip(), quote_labels
     except Exception as e:
         return f"Error: {e}", quote_labels if 'quote_labels' in locals() else []
+    finally:
+        st.session_state.pop("_response_used_chapters", None)
 
 
 # Streamlit UI
@@ -362,12 +557,11 @@ if prompt := st.chat_input("Eingabe:"):
     history_messages = build_history_messages(st.session_state.messages)
 
     with st.chat_message("assistant"):
-        assistant_response, _ = get_openai_response(
+        assistant_response, quote_labels = get_openai_response(
             system_prompt,
             history_messages,
             source_title,
         )
-        quote_labels = build_quote_labels_for_content(assistant_response, fallback_label=source_title)
         render_assistant_message({
             "role": "assistant",
             "content": assistant_response,
